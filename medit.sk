@@ -1,0 +1,60 @@
+options:
+	zaznacz: blaze rod
+	tag: [MEdit]
+	penzel: stick
+
+on leftclick with {@zaznacz}:
+	player has permission "medit":
+		if {medit} is true:
+			cancel event
+			set {punktpierwszy} to location of targeted block
+			send "{@tag}: &2Punkt 1 to %{punktpierwszy}%"
+
+on rightclick with {@zaznacz}:
+	player has permission "medit":
+		if {medit} is true:
+			cancel event
+			set {punktdrugi} to location of targeted block
+			send "{@tag}: &2Punkt 2 to %{punktdrugi}%"
+
+on rightclick with {@penzel}:
+	player has permission "medit":
+		if {medit} is true:
+			cancel event
+			set target block to air
+
+on leftclick with {@penzel}:
+	player has permission "medit":
+		if {medit} is true:
+			cancel event
+			set block above targeted block to {blok}
+
+command /medit [<text>] [<text>] [<text>]:
+	trigger:
+		if player doesn't have permission "medit":
+			send "Brak uprawnien"
+			stop
+		arg 1 is not set:
+			if {medit} is not set:
+				set {medit} to false
+			if {medit} is false:
+				set {medit} to true
+				send "Wlaczono MEdit"
+				stop
+			if {medit} is true:
+				set {medit} to false
+				send "Wylaczono MEdit"
+				stop	
+		arg 1 is "zmien" or "z":
+			arg 2 is not empty:
+				set {_dist.y} to y-coord of {punktpierwszy} - y-coord of {punktdrugi}
+				set {_dist.east} to x-coord of {punktdrugi} - x-coord of {punktpierwszy}
+				set {_dist.north} to z-coord of {punktpierwszy} - z-coord of {punktdrugi}
+				loop blocks from the block at location of {punktpierwszy} to block {_dist.east} meters east of {punktpierwszy}:
+					loop blocks from the block at location of loop-block to block {_dist.north} meters north of loop-block:
+						loop blocks from the block at location of loop-block-2 to block {_dist.y} below loop-block-2:
+							set loop-block-3 to arg 2 parsed as item
+		arg 1 is "block" or "b":
+			arg 2 is not empty:
+				set {blok} to arg 2 parsed as item
+
