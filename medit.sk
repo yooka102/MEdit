@@ -1,60 +1,273 @@
 options:
 	zaznacz: blaze rod
-	tag: [MEdit]
+	tag: &6[MEdit]
 	penzel: stick
+	penzel2: feather
 
 on leftclick with {@zaznacz}:
 	player has permission "medit":
-		if {medit} is true:
+		if {medit.%name of player%} is true:
 			cancel event
 			set {punktpierwszy} to location of targeted block
 			send "{@tag}: &2Punkt 1 to %{punktpierwszy}%"
+			clear {mcefit.block.%name of player%::*}
 
 on rightclick with {@zaznacz}:
 	player has permission "medit":
-		if {medit} is true:
+		if {medit.%name of player%} is true:
 			cancel event
 			set {punktdrugi} to location of targeted block
-			send "{@tag}: &2Punkt 2 to %{punktdrugi}%"
-
+			set {_dist.y} to y-coord of {punktpierwszy} - y-coord of {punktdrugi}
+			set {_dist.east} to x-coord of {punktdrugi} - x-coord of {punktpierwszy}
+			set {_dist.north} to z-coord of {punktpierwszy} - z-coord of {punktdrugi}
+			loop blocks from the block at location of {punktpierwszy} to block {_dist.east} meters east of {punktpierwszy}:
+				loop blocks from the block at location of loop-block to block {_dist.north} meters north of loop-block:
+					loop blocks from the block at location of loop-block-2 to block {_dist.y} below loop-block-2:
+						add loop-block-3 to {mcefit.block.%name of player%::*}
+			send "{@tag}: &2Punkt 2 to %{punktdrugi}%."
+			send "{@tag}: &2Zaznaczono %size of {mcefit.block.%name of player%::*}% blokow"
 on rightclick with {@penzel}:
 	player has permission "medit":
-		if {medit} is true:
+		if {medit.%name of player%} is true:
 			cancel event
 			set target block to air
 
 on leftclick with {@penzel}:
 	player has permission "medit":
-		if {medit} is true:
+		if {medit.%name of player%} is true:
 			cancel event
 			set block above targeted block to {blok}
 
+on rightclick with {@penzel2}:
+	player has permission "medit":
+		if {medit.%name of player%} is true:
+			loop blocks in radius {promien} around the target block:
+				set loop-block to {pblock}
+
+on break:
+	if {medit.%name of player%} is true:
+		cancel event
+
 command /medit [<text>] [<text>] [<text>]:
+	aliases: mt
+	description: Edytor mapy
 	trigger:
 		if player doesn't have permission "medit":
-			send "Brak uprawnien"
+			send "{@tag}: Brak uprawnien"
 			stop
 		arg 1 is not set:
-			if {medit} is not set:
-				set {medit} to false
-			if {medit} is false:
-				set {medit} to true
-				send "Wlaczono MEdit"
+			if {medit.%name of player%} is not set:
+				set {medit.%name of player%} to false
+			if {medit.%name of player%} is false:
+				set {medit.%name of player%} to true
+				send "{@tag}: &2Wlaczono MEdit"
 				stop
-			if {medit} is true:
-				set {medit} to false
-				send "Wylaczono MEdit"
+			if {medit.%name of player%} is true:
+				set {medit.%name of player%} to false
+				send "{@tag}: &cWylaczono MEdit"
 				stop	
-		arg 1 is "zmien" or "z":
+		arg 1 is "set" or "s":
 			arg 2 is not empty:
-				set {_dist.y} to y-coord of {punktpierwszy} - y-coord of {punktdrugi}
-				set {_dist.east} to x-coord of {punktdrugi} - x-coord of {punktpierwszy}
-				set {_dist.north} to z-coord of {punktpierwszy} - z-coord of {punktdrugi}
-				loop blocks from the block at location of {punktpierwszy} to block {_dist.east} meters east of {punktpierwszy}:
-					loop blocks from the block at location of loop-block to block {_dist.north} meters north of loop-block:
-						loop blocks from the block at location of loop-block-2 to block {_dist.y} below loop-block-2:
-							set loop-block-3 to arg 2 parsed as item
+				loop {mcefit.block.%name of player%::*}:
+					set block at loop-value to arg 2 parsed as item
+		arg 1 is "r":
+			arg 2 is not empty:
+				arg 3 is not empty:
+					loop {mcefit.block.%name of player%::*}:
+						if loop-value is arg 2 parsed as item:
+							set block at loop-value to arg 3 parsed as item
 		arg 1 is "block" or "b":
 			arg 2 is not empty:
 				set {blok} to arg 2 parsed as item
+				stop
+		arg 1 is "expand" or "e":
+			arg 2 is "up":
+				arg 3 is not empty:
+					stop
+		arg 1 is "kula":
+			arg 2 is not empty:
+				arg 3 is not empty:
+					loop blocks in radius arg-2 parsed as number around the target block:
+						set loop-block to arg 3 parsed as item
+					send "{@tag}: &2Utworzono kule"
+		arg 1 is "pkula":
+			arg 2 is not empty:
+				arg 3 is not empty:
+					set {pblock} to arg 3 parsed as item
+					set {promien} to arg 2 parsed as number
+					send "{@tag}: &2Zapisano ustawienia penzla"
+		arg 1 is "choinka":
+			set block 1 above targeted block to spruce log
+			set block 2 above targeted block to spruce log
+			set block 3 above targeted block to spruce log
+			set block 4 above targeted block to spruce log
+			set block 1 north block 4 above targeted block to spruce leaves
+			set block 1 south block 4 above targeted block to spruce leaves
+			set block 1 east block 4 above targeted block to spruce leaves	
+			set block 1 west block 4 above targeted block to spruce leaves
+			set block 1 west 1 north block 4 above targeted block to spruce leaves
+			set block 1 west 1 south block 4 above targeted block to spruce leaves
+			set block 1 east 1 south block 4 above targeted block to spruce leaves	
+			set block 1 east 1 north block 4 above targeted block to spruce leaves
+			set block 5 above targeted block to spruce log
+			set block 6 above targeted block to spruce log
+			set block 1 north block 6 above targeted block to spruce leaves
+			set block 1 south block 6 above targeted block to spruce leaves
+			set block 1 east block 6 above targeted block to spruce leaves	
+			set block 1 west block 6 above targeted block to spruce leaves
+			set block 1 west 1 north block 6 above targeted block to spruce leaves
+			set block 1 west 1 south block 6 above targeted block to spruce leaves
+			set block 1 east 1 south block 6 above targeted block to spruce leaves	
+			set block 1 east 1 north block 6 above targeted block to spruce leaves
+		arg 1 is "dom":
+			set block 1 above targeted block to bricks
+			set block 1 east block 1 above targeted block to bricks
+			set block 2 east block 1 above targeted block to bricks
+			set block 3 east block 1 above targeted block to bricks
+			set block 3 east 1 north block 1 above targeted block to bricks
+			set block 3 east 2 north block 1 above targeted block to bricks
+			set block 3 east 3 north block 1 above targeted block to bricks
+			set block 3 east 4 north block 1 above targeted block to bricks
+			set block 3 east 5 north block 1 above targeted block to bricks
+			set block 3 west block 1 above targeted block to bricks
+			set block 4 west block 1 above targeted block to bricks
+			set block 5 west block 1 above targeted block to bricks
+			set block 6 west block 1 above targeted block to bricks
+			set block 6 west 1 north block 1 above targeted block to bricks
+			set block 6 west 2 north block 1 above targeted block to bricks
+			set block 6 west 3 north block 1 above targeted block to bricks
+			set block 6 west 4 north block 1 above targeted block to bricks
+			set block 6 west 5 north block 1 above targeted block to bricks
+			set block 5 west 5 north block 1 above targeted block to bricks
+			set block 4 west 5 north block 1 above targeted block to bricks
+			set block 3 west 5 north block 1 above targeted block to bricks
+			set block 2 west 5 north block 1 above targeted block to bricks
+			set block 1 west 5 north block 1 above targeted block to bricks
+			set block 5 north block 1 above targeted block to bricks
+			set block 5 north 1 east block 1 above targeted block to bricks
+			set block 5 north 2 east block 1 above targeted block to bricks
 
+			set block 2 above targeted block to bricks
+			set block 1 east block 2 above targeted block to bricks
+			set block 2 east block 2 above targeted block to bricks
+			set block 3 east block 2 above targeted block to bricks
+			set block 3 east 1 north block 2 above targeted block to bricks
+			set block 3 east 2 north block 2 above targeted block to bricks
+			set block 3 east 3 north block 2 above targeted block to bricks
+			set block 3 east 4 north block 2 above targeted block to bricks
+			set block 3 east 5 north block 2 above targeted block to bricks
+			set block 3 west block 2 above targeted block to bricks
+			set block 4 west block 2 above targeted block to bricks
+			set block 5 west block 2 above targeted block to bricks
+			set block 6 west block 2 above targeted block to bricks
+			set block 6 west 1 north block 2 above targeted block to bricks
+			set block 6 west 2 north block 2 above targeted block to bricks
+			set block 6 west 3 north block 2 above targeted block to bricks
+			set block 6 west 4 north block 2 above targeted block to bricks
+			set block 6 west 5 north block 2 above targeted block to bricks
+			set block 5 west 5 north block 2 above targeted block to bricks
+			set block 4 west 5 north block 2 above targeted block to bricks
+			set block 3 west 5 north block 2 above targeted block to bricks
+			set block 2 west 5 north block 2 above targeted block to bricks
+			set block 1 west 5 north block 2 above targeted block to bricks
+			set block 5 north block 2 above targeted block to bricks
+			set block 5 north 1 east block 2 above targeted block to bricks
+			set block 5 north 2 east block 2 above targeted block to bricks
+
+			set block 3 above targeted block to bricks
+			set block 1 east block 3 above targeted block to bricks
+			set block 2 east block 3 above targeted block to bricks
+			set block 3 east block 3 above targeted block to bricks
+			set block 3 east 1 north block 3 above targeted block to bricks
+			set block 3 east 2 north block 3 above targeted block to bricks
+			set block 3 east 3 north block 3 above targeted block to bricks
+			set block 3 east 4 north block 3 above targeted block to bricks
+			set block 3 east 5 north block 3 above targeted block to bricks
+			set block 1 west block 3 above targeted block to bricks
+			set block 2 west block 3 above targeted block to bricks
+			set block 3 west block 3 above targeted block to bricks
+			set block 4 west block 3 above targeted block to bricks
+			set block 5 west block 3 above targeted block to bricks
+			set block 6 west block 3 above targeted block to bricks
+			set block 6 west 1 north block 3 above targeted block to bricks
+			set block 6 west 2 north block 3 above targeted block to bricks
+			set block 6 west 3 north block 3 above targeted block to bricks
+			set block 6 west 4 north block 3 above targeted block to bricks
+			set block 6 west 5 north block 3 above targeted block to bricks
+			set block 5 west 5 north block 3 above targeted block to bricks
+			set block 4 west 5 north block 3 above targeted block to bricks
+			set block 3 west 5 north block 3 above targeted block to bricks
+			set block 2 west 5 north block 3 above targeted block to bricks
+			set block 1 west 5 north block 3 above targeted block to bricks
+			set block 5 north block 3 above targeted block to bricks
+			set block 5 north 1 east block 3 above targeted block to bricks
+			set block 5 north 2 east block 3 above targeted block to bricks
+
+			set block 4 above targeted block to oak wood planks
+			set block 1 east block 4 above targeted block to oak wood planks
+			set block 2 east block 4 above targeted block to oak wood planks
+			set block 3 east block 4 above targeted block to oak wood planks
+			set block 3 east 1 north block 4 above targeted block to oak wood planks
+			set block 3 east 2 north block 4 above targeted block to oak wood planks
+			set block 3 east 3 north block 4 above targeted block to oak wood planks
+			set block 3 east 4 north block 4 above targeted block to oak wood planks
+			set block 3 east 5 north block 4 above targeted block to oak wood planks
+			set block 1 west block 4 above targeted block to oak wood planks
+			set block 2 west block 4 above targeted block to oak wood planks
+			set block 3 west block 4 above targeted block to oak wood planks
+			set block 4 west block 4 above targeted block to oak wood planks
+			set block 5 west block 4 above targeted block to oak wood planks
+			set block 6 west block 4 above targeted block to oak wood planks
+			set block 6 west 1 north block 4 above targeted block to oak wood planks
+			set block 6 west 2 north block 4 above targeted block to oak wood planks
+			set block 6 west 3 north block 4 above targeted block to oak wood planks
+			set block 6 west 4 north block 4 above targeted block to oak wood planks
+			set block 6 west 5 north block 4 above targeted block to oak wood planks
+			set block 5 west 5 north block 4 above targeted block to oak wood planks
+			set block 4 west 5 north block 4 above targeted block to oak wood planks
+			set block 3 west 5 north block 4 above targeted block to oak wood planks
+			set block 2 west 5 north block 4 above targeted block to oak wood planks
+			set block 1 west 5 north block 4 above targeted block to oak wood planks
+			set block 5 north block 4 above targeted block to oak wood planks
+			set block 5 north 1 east block 4 above targeted block to oak wood planks
+			set block 5 north 2 east block 4 above targeted block to oak wood planks
+
+			set block 1 north block 4 above targeted block to oak wood planks
+			set block 2 north block 4 above targeted block to oak wood planks
+			set block 3 north block 4 above targeted block to oak wood planks
+			set block 4 north block 4 above targeted block to oak wood planks
+
+			set block 1 north 1 west block 4 above targeted block to oak wood planks
+			set block 2 north 1 west block 4 above targeted block to oak wood planks
+			set block 3 north 1 west block 4 above targeted block to oak wood planks
+			set block 4 north 1 west block 4 above targeted block to oak wood planks
+
+			set block 1 north 2 west block 4 above targeted block to oak wood planks
+			set block 2 north 2 west block 4 above targeted block to oak wood planks
+			set block 3 north 2 west block 4 above targeted block to oak wood planks
+			set block 4 north 2 west block 4 above targeted block to oak wood planks
+
+			set block 1 north 3 west block 4 above targeted block to oak wood planks
+			set block 2 north 3 west block 4 above targeted block to oak wood planks
+			set block 3 north 3 west block 4 above targeted block to oak wood planks
+			set block 4 north 3 west block 4 above targeted block to oak wood planks
+
+			set block 1 north 4 west block 4 above targeted block to oak wood planks
+			set block 2 north 4 west block 4 above targeted block to oak wood planks
+			set block 3 north 4 west block 4 above targeted block to oak wood planks
+			set block 4 north 4 west block 4 above targeted block to oak wood planks
+
+			set block 1 north 5 west block 4 above targeted block to oak wood planks
+			set block 2 north 5 west block 4 above targeted block to oak wood planks
+			set block 3 north 5 west block 4 above targeted block to oak wood planks
+			set block 4 north 5 west block 4 above targeted block to oak wood planks
+
+			set block 1 north 1 east block 4 above targeted block to oak wood planks
+			set block 2 north 1 east block 4 above targeted block to oak wood planks
+			set block 3 north 1 east block 4 above targeted block to oak wood planks
+			set block 4 north 1 east block 4 above targeted block to oak wood planks
+
+			set block 1 north 2 east block 4 above targeted block to oak wood planks
+			set block 2 north 2 east block 4 above targeted block to oak wood planks
+			set block 3 north 2 east block 4 above targeted block to oak wood planks
+			set block 4 north 2 east block 4 above targeted block to oak wood planks
